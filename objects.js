@@ -4,48 +4,71 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 
-// 弹窗相关元素
+// 界面元素
 const modal = document.getElementById('gameOverModal');
+const victoryModal = document.getElementById('victoryModal');
+const startScreen = document.getElementById('startScreen');
 const finalScoreSpan = document.getElementById('finalScore');
-const restartBtn = document.getElementById('restartBtn');
+const victoryScoreSpan = document.getElementById('victoryScore');
 
-// 全局游戏状态
+const restartBtn = document.getElementById('restartBtn');
+const startBtn = document.getElementById('startBtn');
+const victoryBtn = document.getElementById('victoryBtn');
+
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+
+// 【修改】音频对象 (按照你的要求更新)
+const shootSound = new Audio('./laserShoot.wav');
+const explosionSound = new Audio('./explosion.wav');
+const moveSound = new Audio('./hitHurt.wav');
+// 注意：hitHurt.wav 通常是单次音效，不适合 loop，所以我把 loop 关掉了，或者你可以换个引擎声
+moveSound.loop = false;
+moveSound.volume = 0.4;
+
+// 游戏状态
 let score = 0;
 let keys = {};
-let isGameRunning = true; // 【新增】控制游戏是否正在进行
+let isGameRunning = false;
+let screenShake = 0;
+let timeStop = false;
 
-// 【新增】敌人数量上限 (防止卡顿)
-const MAX_ENEMIES = 10;
+// 任务系统变量
+const TARGET_KILLS = 20;
+let tanksDestroyed = 0;
 
-// 玩家对象
+// 玩家
 const player = {
-  x: 400,
-  y: 500,
-  radius: 15,
-  speed: 4,
+  x: 400, y: 500, radius: 15,
+  speed: 2.5,
   color: '#00FF00',
-  dx: 0,
-  dy: -1,
-  lastShotTime: 0,
-  shootDelay: 250
+  dx: 0, dy: -1,
+  lastShotTime: 0, shootDelay: 250,
+  weaponLevel: 1,
+  hasShield: false, shieldTime: 0
 };
 
-// 游戏物体
+// 数组
 let playerBullets = [];
 let enemyBullets = [];
 let enemies = [];
 let particles = [];
+let powerups = [];
 
-// 地图墙壁
-const walls = [
-  { x: 100, y: 100, w: 200, h: 30 },
-  { x: 500, y: 100, w: 200, h: 30 },
-  { x: 300, y: 300, w: 30, h: 200 },
-  { x: 150, y: 400, w: 100, h: 30 },
-  { x: 550, y: 400, w: 100, h: 30 }
+// 地图
+const steelWalls = [
+  { x: 100, y: 150, w: 100, h: 30 },
+  { x: 600, y: 150, w: 100, h: 30 },
+  { x: 385, y: 300, w: 30, h: 100 }
 ];
+let brickWalls = [];
+function initBrickWalls() {
+  brickWalls = [];
+  for (let i = 0; i < 10; i++) { brickWalls.push({ x: 200 + i * 40, y: 400, w: 40, h: 20, hp: 1 }); }
+  for (let i = 0; i < 5; i++) { brickWalls.push({ x: 100, y: 250 + i * 30, w: 30, h: 30, hp: 1 }); }
+  for (let i = 0; i < 5; i++) { brickWalls.push({ x: 670, y: 250 + i * 30, w: 30, h: 30, hp: 1 }); }
+}
 
-// 碰撞检测
 function circleRectCollision(circle, rect) {
   let closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.w));
   let closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.h));
@@ -53,14 +76,3 @@ function circleRectCollision(circle, rect) {
   let distanceY = circle.y - closestY;
   return (distanceX * distanceX) + (distanceY * distanceY) < (circle.radius * circle.radius);
 }
-
-// 【新增】音效对象
-// 注意：如果你的文件名不一样，这里要改成对应的名字
-const shootSound = new Audio('./click.wav');
-const explosionSound = new Audio('./explosion.wav');
-const moveSound = new Audio('./hitHurt.wav');
-
-// 设置移动音效循环播放
-moveSound.loop = true;
-// 适当降低引擎音量，不然太吵
-moveSound.volume = 0.5;

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>网页坦克大战 (任务版)</title>
+  <link rel="stylesheet" href="./坦克大战.css">
+</head>
+
+<body>
+
+  <div class="game-container">
+    <h1>坦克大战 (任务版)</h1>
+
+    <div class="mission-panel">
+      <div class="progress-container">
+        <div id="progressBar" class="progress-bar"></div>
+        <span id="progressText" class="progress-text">任务目标: 0 / 20</span>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <p>控制: <strong>方向键</strong> 移动 | <strong>空格</strong> 射击</p>
+      <p>道具: <span style="color:#00FFFF">S-散弹</span> <span style="color:#FFFF00">T-定身</span> <span
+          style="color:#FF00FF">H-护盾</span></p>
+      <p>得分: <span id="score">0</span></p>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <div id="startScreen" class="modal" style="display: block;">
+      <div class="modal-content">
+        <h2 style="color: #4CAF50;">行动代号：黎明</h2>
+        <p>任务目标：击毁 <strong>20</strong> 辆敌方坦克</p>
+        <ul style="text-align: left; display: inline-block; font-size: 14px; color: #ccc;">
+          <li>红色坦克：普通敌人</li>
+          <li>紫色坦克：速度快 (优先击杀)</li>
+          <li>大号坦克：装甲厚 (需3炮)</li>
+        </ul>
+        <br><br>
+        <button id="startBtn">开始任务</button>
+      </div>
+    </div>
+
+    <div id="gameOverModal" class="modal">
+      <div class="modal-content">
+        <h2 style="color: red;">任务失败</h2>
+        <p>最终得分: <span id="finalScore">0</span></p>
+        <button id="restartBtn">重新挑战</button>
+      </div>
+    </div>
+
+    <div id="victoryModal" class="modal">
+      <div class="modal-content" style="border-color: gold; box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);">
+        <h2 style="color: gold; text-shadow: 0 0 10px gold;">任务完成！</h2>
+        <p style="color: #fff;">你成功击退了敌军进攻！</p>
+        <p>最终得分: <span id="victoryScore">0</span></p>
+        <button id="victoryBtn" style="background-color: gold; color: black;">再次游玩</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./objects.js"></script>
+  <script src="./main.js"></script>
+
+</body>
+
+</html>
